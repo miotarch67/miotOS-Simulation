@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>miotOS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+*{box-sizing:border-box;margin:0;font-family:"Segoe UI",system-ui,sans-serif}
+html,body{height:100%;overflow:hidden;background:#000;color:#fff;user-select:none;-webkit-user-select:none}
+input,textarea{-webkit-user-select:text;user-select:text;-webkit-appearance:none}
+#lock{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0a2a5e,#1a6fd1 55%,#6a3fc4);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .6s,opacity .6s}
+#lock.up{transform:translateY(-100%);opacity:0}
+#lock .t{font-size:84px;font-weight:200}#lock .d{font-size:22px;margin-bottom:40px}
+#lock .av{width:90px;height:90px;border-radius:50%;background:#ffffff33;display:flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:10px}
+#pw{padding:10px 14px;width:240px;border:0;border-radius:4px;background:#ffffffd9;color:#111;font-size:16px;outline:0}
+#lock button{margin-top:10px;padding:8px 22px;border:0;border-radius:4px;background:#0078d4;color:#fff;cursor:pointer}
+#msg{height:20px;margin-top:8px;font-size:14px}
+.shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+#desk{position:fixed;inset:0;bottom:44px;background:radial-gradient(ellipse at 30% 20%,#2b8be0,#0b3d91 60%,#08224f);overflow:hidden}
+#desk::after{content:"";position:absolute;inset:0;background:conic-gradient(from 200deg at 70% 60%,transparent,#ffffff14,transparent 30%);animation:spin 40s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ic{position:absolute;width:78px;text-align:center;padding:6px 2px;border-radius:4px;cursor:pointer;font-size:12px;text-shadow:0 1px 3px #000;z-index:1}
+.ic:hover{background:#ffffff2a}.ic b{display:block;font-size:34px;font-weight:400}
+.win{position:absolute;background:#202124;border:1px solid #444;border-radius:8px;box-shadow:0 10px 40px #0008;display:flex;flex-direction:column;overflow:hidden;animation:pop .2s}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.win.max{inset:0!important;width:auto!important;height:auto!important;border-radius:0}
+.win.min{display:none}
+.tb{height:34px;background:#2d2e31;display:flex;align-items:center;padding-left:10px;cursor:move;flex:none}
+.tb span{flex:1;font-size:13px}.tb i{width:42px;height:34px;display:flex;align-items:center;justify-content:center;font-style:normal;cursor:pointer}
+.tb i:hover{background:#ffffff22}.tb i.x:hover{background:#e81123}
+.bd{flex:1;overflow:auto;background:#1b1c1e;position:relative;min-height:0}
+#bar{position:fixed;left:0;right:0;bottom:0;height:44px;background:#101114ee;backdrop-filter:blur(14px);display:flex;align-items:center;z-index:5000}
+#bar>*{height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#st{width:48px;font-size:20px}#st:hover,.tk:hover{background:#ffffff22}
+#tks{flex:1;justify-content:flex-start!important}.tk{padding:0 14px;font-size:13px;border-bottom:3px solid #4aa3ff;max-width:150px;overflow:hidden;white-space:nowrap}
+.tk.m{border-bottom-color:transparent}
+#clk{padding:0 12px;font-size:12px;text-align:center;line-height:1.25;cursor:default}
+#menu{position:fixed;left:0;bottom:44px;width:300px;background:#18191cf2;backdrop-filter:blur(16px);z-index:6000;padding:10px;display:none;border-radius:8px 8px 0 0;animation:pop .15s}
+#menu div{padding:9px 10px;border-radius:4px;cursor:pointer;font-size:14px}#menu div:hover{background:#ffffff22}
+#menu hr{border:0;border-top:1px solid #333;margin:6px 0}
+.pad{padding:14px}h3{font-weight:400;margin-bottom:8px}
+input.f,select.f{background:#2d2e31;border:1px solid #555;color:#fff;padding:8px;border-radius:4px;outline:0;font-size:14px}
+button.b{background:#0078d4;border:0;color:#fff;padding:7px 14px;border-radius:4px;cursor:pointer;margin:3px 3px 3px 0;font-size:13px}
+button.b:hover{background:#1a8ae6}button.g{background:#444}
+.card{background:#2a2b2e;border-radius:6px;padding:12px;margin:8px 0;font-size:14px;line-height:1.5}
+.chip{display:inline-block;padding:4px 10px;margin:2px;border-radius:12px;background:#333;cursor:pointer;font-size:12px}.chip.on{background:#0078d4}
+canvas{width:100%;background:#111;border-radius:4px;display:block}
+.bar{height:14px;background:#333;border-radius:7px;overflow:hidden;margin:4px 0 10px}.bar>div{height:100%;background:#4aa3ff;transition:width .4s}
+#grid{display:grid;grid-template-columns:repeat(32,1fr);gap:2px}#grid div{aspect-ratio:1;background:#2a2b2e;border-radius:2px;transition:background .3s,transform .3s}
+textarea{width:100%;height:100%;background:#1b1c1e;color:#eee;border:0;padding:10px;font:14px Consolas,monospace;outline:0;resize:none}
+.ky{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px}.ky button{padding:14px;border:0;border-radius:4px;background:#333;color:#fff;font-size:16px;cursor:pointer}.ky button:hover{background:#4a4a4a}
+.dsp{text-align:right;font-size:30px;padding:14px;min-height:62px}
+#lock{background-size:300% 300%;animation:gb 12s ease infinite}
+#lock.shake{animation:sh .35s}
+@keyframes gb{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+#lock>*:not(i){position:relative;z-index:1}
+#lock .t{animation:glow 3s ease-in-out infinite}
+@keyframes glow{50%{text-shadow:0 0 28px #8cf}}
+.bub,.orb{position:absolute;bottom:-120px;border-radius:50%;background:#ffffff1f;animation:rise linear infinite;pointer-events:none}
+.orb{background:radial-gradient(#6cf6,transparent 70%);z-index:0}
+@keyframes rise{from{opacity:.9}to{transform:translateY(-115vh) scale(1.3);opacity:0}}
+@keyframes iconin{from{opacity:0;transform:translateX(-30px) scale(.6)}}
+@keyframes bob{50%{transform:translateY(-6px) scale(1.12)}}
+.ic:hover b{animation:bob .6s}
+@keyframes mi{from{opacity:0;transform:translateX(-14px)}}
+#menu div{animation:mi .25s both}
+.tk{animation:tkin .3s}@keyframes tkin{from{transform:translateY(20px);opacity:0}}
+#st,#snd{transition:transform .2s}#st:hover,#snd:hover{transform:scale(1.15) rotate(8deg)}
+#snd{width:40px}
+button.b{transition:transform .1s,background .2s}button.b:active{transform:scale(.94)}
+.toast{position:fixed;right:14px;bottom:58px;background:#2d2e31f2;border-left:4px solid #4aa3ff;padding:12px 16px;border-radius:6px;z-index:9000;font-size:14px;animation:tin .4s,tout .4s 2.7s forwards}
+@keyframes tin{from{transform:translateX(120%)}}@keyframes tout{to{opacity:0;transform:translateX(120%)}}
+.rip{position:fixed;width:10px;height:10px;margin:-5px;border:2px solid #7cf;border-radius:50%;pointer-events:none;z-index:99999;animation:rp .6s forwards}
+@keyframes rp{to{transform:scale(6);opacity:0}}
+.opt{display:block;width:100%;text-align:left;padding:10px 12px;margin:6px 0;border:0;border-radius:6px;background:#2d2e31;color:#fff;font-size:14px;cursor:pointer;transition:transform .15s,background .2s}
+.opt:hover:not(:disabled){transform:translateX(4px);background:#3a3b3f}
+.opt.ok{background:#1e8a4c;animation:pulse .4s}.opt.no{background:#b3261e;animation:sh .35s}
+@keyframes pulse{50%{transform:scale(1.04)}}
+.fi{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#2a2b2e;border-radius:6px;margin:4px 0;animation:mi .25s both}
+.fi:hover{background:#34353a}
+.bd,.bd *{-webkit-user-select:text;user-select:text}
+.bd button,.bd .chip,.bd .fi{-webkit-user-select:none;user-select:none}
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:18px;height:18px}
+.lg i{background:#4aa3ff;border-radius:1px;transition:background .2s}
+#st:hover .lg i{background:#9fd0ff}
+#st.pop{animation:stpop .7s cubic-bezier(.2,1.5,.4,1)}
+#st.pop .lg i{animation:stsq .6s both}
+#st.pop .lg i:nth-child(2){animation-delay:.08s}#st.pop .lg i:nth-child(3){animation-delay:.16s}#st.pop .lg i:nth-child(4){animation-delay:.24s}
+@keyframes stpop{0%{transform:scale(1)}30%{transform:scale(.7) rotate(-15deg)}60%{transform:scale(1.3) rotate(15deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes stsq{0%{transform:scale(1)}40%{transform:scale(1.7);background:#ffd166}100%{transform:scale(1)}}
+#menu{transform-origin:0 100%;animation:mopen .3s cubic-bezier(.2,1.4,.4,1)}
+@keyframes mopen{from{opacity:0;transform:translateY(30px) scale(.9)}}
+</style></head><body>
+
+<div id="lock">
+ <div class="t" id="lt"></div><div class="d" id="ld"></div>
+ <div class="av">👤</div><div style="margin-bottom:10px">miotarch</div>
+ <input id="pw" type="password" placeholder="Password" autocomplete="off">
+ <button id="go">Sign in</button><div id="msg"></div>
+</div>
+
+<div id="desk"></div>
+<div id="menu"></div>
+<div id="bar"><div id="st"><span class="lg"><i></i><i></i><i></i><i></i></span></div><div id="tks"></div><div id="snd" title="Sound on/off">🔊</div><div id="clk"></div></div>
+
+<script>
+const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,"0");
+const PASS="1123581321";
+// ---------- lock screen ----------
+function tick(){const n=new Date();
+ $("#lt").textContent=pad(n.getHours())+":"+pad(n.getMinutes());
+ $("#ld").textContent=n.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+ $("#clk").innerHTML=n.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+"<br>"+n.toLocaleDateString();}
+setInterval(tick,1000);tick();
+function unlock(){
+ if($("#pw").value===PASS){SFX.unlock();musicStart();welcome();$("#lock").classList.add("up");$("#pw").value="";$("#msg").textContent="";}
+ else{SFX.bad();$("#msg").textContent="The password is incorrect. Try again.";$("#pw").value="";$("#lock").classList.remove("shake");void $("#lock").offsetWidth;$("#lock").classList.add("shake");}}
+$("#lock").onclick=e=>{if(e.target.id!=="go")$("#pw").focus()};setTimeout(()=>$("#pw").focus(),300);
+$("#go").onclick=unlock;$("#pw").addEventListener("keydown",e=>{if(e.key==="Enter")unlock()});
+function lockNow(){$("#lock").classList.remove("up");$("#menu").style.display="none";$("#pw").focus();}
+
+// ---------- state ----------
+const S={wins:[],z:10,alloc:0,load:0,cpu:[]};
+const TOTAL=16384; // MB
+const sysMB=()=>3100+S.wins.length*380+Math.round(Math.sin(Date.now()/4000)*60);
+const usedMB=()=>Math.min(TOTAL,sysMB()+S.alloc);
+
+// ---------- apps ----------
+const APPS={
+ net:{n:"Internet",i:"🌐",w:640,h:480,f:netApp},
+ tm:{n:"Task Manager",i:"📊",w:520,h:460,f:tmApp},
+ leaf:{n:"Limeleaf",i:"🍃",w:420,h:520,f:leafApp},
+ note:{n:"Notepad",i:"📝",w:480,h:360,f:noteApp},files:{n:"My Files",i:"📁",w:560,h:420,f:filesApp},
+ calc:{n:"Calculator",i:"🔢",w:280,h:400,f:calcApp},
+ clock:{n:"World Clock",i:"🕒",w:360,h:380,f:clockApp}
+};
+Object.entries(APPS).forEach(([k,a],j)=>{const d=document.createElement("div");d.className="ic";const per=Math.max(1,Math.floor(($("#desk").clientHeight-10)/92));d.style.left=(14+Math.floor(j/per)*90)+"px";d.style.top=(14+(j%per)*92)+"px";d.style.animation=`iconin .5s ${j*.08}s both`;
+ d.innerHTML=`<b>${a.i}</b>${a.n}`;d.ondblclick=()=>openApp(k);makeDrag(d,k);$("#desk").append(d);});
+$("#menu").innerHTML=Object.entries(APPS).map(([k,a])=>`<div data-k="${k}">${a.i}&nbsp; ${a.n}</div>`).join("")+'<hr><div data-k="_lock">🔒&nbsp; Lock</div>';
+$("#menu").onclick=e=>{const k=e.target.dataset.k;if(!k)return;$("#menu").style.display="none";k==="_lock"?lockNow():openApp(k)};
+$("#st").onclick=e=>{e.stopPropagation();const st=$("#st");st.classList.remove("pop");void st.offsetWidth;st.classList.add("pop");const m=$("#menu");m.style.display=m.style.display==="block"?"none":"block"};
+document.onclick=e=>{if(!e.target.closest("#menu"))$("#menu").style.display="none"};
+
+// ---------- window manager ----------
+function openApp(k,arg){
+ const a=APPS[k],w=document.createElement("div");w.className="win";
+ const dw=$("#desk").clientWidth,dh=$("#desk").clientHeight,W=Math.min(a.w,dw-20),H=Math.min(a.h,dh-20);
+ w.style.cssText=`width:${W}px;height:${H}px;left:${Math.max(0,100+S.wins.length*28)%(Math.max(1,dw-W))+20}px;top:${40+S.wins.length*24%Math.max(1,dh-H)}px;z-index:${++S.z}`;
+ w.innerHTML=`<div class="tb"><span>${a.i} ${a.n}</span><i class="mn">—</i><i class="mx">☐</i><i class="x">✕</i></div><div class="bd"></div>`;
+ $("#desk").append(w);
+ const tk=document.createElement("div");tk.className="tk";tk.textContent=a.i+" "+a.n;$("#tks").append(tk);
+ const o={k,w,tk,mb:150+Math.round(Math.random()*400),cleanup:null,name:a.n};S.wins.push(o);
+ const focus=()=>{w.style.zIndex=++S.z;w.classList.remove("min");tk.classList.remove("m")};
+ w.onmousedown=focus;
+ tk.onclick=()=>{if(w.classList.contains("min")||+w.style.zIndex<S.z)focus();else{w.classList.add("min");tk.classList.add("m")}};
+ w.querySelector(".mn").onclick=e=>{e.stopPropagation();w.classList.add("min");tk.classList.add("m")};
+ w.querySelector(".mx").onclick=()=>w.classList.toggle("max");
+ w.querySelector(".x").onclick=()=>closeWin(o);
+ const tb=w.querySelector(".tb");tb.ondblclick=()=>w.classList.toggle("max");
+ tb.onpointerdown=e=>{if(e.target.tagName==="I"||w.classList.contains("max"))return;
+  const dx=e.clientX-w.offsetLeft,dy=e.clientY-w.offsetTop;tb.setPointerCapture(e.pointerId);
+  tb.onpointermove=m=>{w.style.left=m.clientX-dx+"px";w.style.top=Math.max(0,m.clientY-dy)+"px"};
+  tb.onpointerup=()=>{tb.onpointermove=null}};
+ SFX.open();o.cleanup=a.f(w.querySelector(".bd"),o,arg)||null;
+ return o;
+}
+function closeWin(o){SFX.close();if(o.cleanup)o.cleanup();o.w.style.transition="opacity .15s,transform .15s";o.w.style.opacity=0;o.w.style.transform="scale(.9)";
+ setTimeout(()=>{o.w.remove();o.tk.remove()},150);S.wins=S.wins.filter(x=>x!==o);}
+
+// ---------- Internet ----------
+const C=[
+["Japan","Asia","Tokyo","125M","Japanese","Home to bullet trains that average delays under a minute.","Asia/Tokyo"],
+["India","Asia","New Delhi","1.43B","Hindi, English + 20 more official","World’s most populous country; the chess game and the number zero have roots here.","Asia/Kolkata"],
+["China","Asia","Beijing","1.41B","Mandarin","Operates the world’s longest high-speed rail network.","Asia/Shanghai"],
+["Egypt","Africa","Cairo","112M","Arabic","The Great Pyramid of Giza was the tallest structure on Earth for ~3,800 years.","Africa/Cairo"],
+["Nigeria","Africa","Abuja","224M","English","Africa’s most populous nation, with a huge film industry called Nollywood.","Africa/Lagos"],
+["Kenya","Africa","Nairobi","55M","Swahili, English","Known for the Great Migration of wildebeest and for world-class distance runners.","Africa/Nairobi"],
+["South Africa","Africa","Pretoria, Cape Town, Bloemfontein","60M","11 official languages","Has three capital cities.","Africa/Johannesburg"],
+["France","Europe","Paris","68M","French","The most visited country in the world by tourist arrivals.","Europe/Paris"],
+["Germany","Europe","Berlin","84M","German","Many Autobahn stretches have no general speed limit.","Europe/Berlin"],
+["Iceland","Europe","Reykjavik","380K","Icelandic","Almost all electricity and heating comes from renewable geothermal and hydro power.","Atlantic/Reykjavik"],
+["United Kingdom","Europe","London","68M","English","Greenwich here defines the prime meridian used for world time zones.","Europe/London"],
+["United States","N. America","Washington, D.C.","335M","English","Home to the origin of the internet’s ancestor, ARPANET (1969).","America/New_York"],
+["Canada","N. America","Ottawa","40M","English, French","Has more lakes than the rest of the world’s countries combined.","America/Toronto"],
+["Mexico","N. America","Mexico City","129M","Spanish","Chocolate and chilies were first cultivated here.","America/Mexico_City"],
+["Brazil","S. America","Brasília","216M","Portuguese","Holds about 60% of the Amazon rainforest.","America/Sao_Paulo"],
+["Peru","S. America","Lima","34M","Spanish, Quechua","Machu Picchu was built by the Inca around 1450.","America/Lima"],
+["Australia","Oceania","Canberra","26M","English","Wider than the Moon’s diameter, and home to more kangaroos than people.","Australia/Sydney"],
+["New Zealand","Oceania","Wellington","5.2M","English, Māori, NZ Sign","Was the first country to have its women vote in national elections (1893).","Pacific/Auckland"],
+["Antarctica","Antarctica","—","~1,000 scientists","None official","Holds about 70% of Earth’s fresh water, as ice.","Antarctica/McMurdo"]
+];
+// ---------- World Clock ----------
+function clockApp(b){
+ const z=[["Kolkata","Asia/Kolkata"],["Tokyo","Asia/Tokyo"],["Dubai","Asia/Dubai"],["London","Europe/London"],["New York","America/New_York"],["Los Angeles","America/Los_Angeles"],["Sydney","Australia/Sydney"]];
+ b.innerHTML='<div class="pad"></div>';const p=b.firstChild;
+ const up=()=>p.innerHTML=z.map(([n,t])=>`<div class="card" style="display:flex;justify-content:space-between"><span>${n}</span><b>${new Date().toLocaleTimeString([],{timeZone:t})}</b></div>`).join("");
+ up();const iv=setInterval(up,1000);return()=>clearInterval(iv);
+}
+
+// ---------- Task Manager ----------
+function tmApp(b,me){
+ b.innerHTML=`<div class="pad"><canvas id="cv" width="480" height="110"></canvas>
+ <div style="margin-top:8px">CPU <b id="cp"></b></div><div class="bar"><div id="cb"></div></div>
+ <div>Memory <b id="mm"></b></div><div class="bar"><div id="mb" style="background:#a56bff"></div></div>
+ <button class="b" id="bn">⚡ Run speed test</button><span id="sr"></span>
+ <h3 style="margin-top:10px">Processes</h3><div id="pl"></div></div>`;
+ const cv=b.querySelector("#cv"),x=cv.getContext("2d");
+ b.querySelector("#bn").onclick=()=>{const bn=b.querySelector("#sr");bn.textContent=" Running…";S.load=70;
+  setTimeout(()=>{let t=performance.now(),n=0,v=0;while(performance.now()-t<350){for(let i=0;i<5e4;i++)v+=Math.sqrt(i);n+=5e4}
+   const s=n/350/1000;bn.innerHTML=` <b>${s.toFixed(1)} M ops/s</b> — ${s>60?"Blazing 🚀":s>25?"Fast ✅":"Relaxed 🐢"}`;S.load=0},60)};
+ const up=()=>{
+  const c=Math.min(100,Math.round(6+S.wins.length*3+Math.random()*8+S.load));S.cpu.push(c);if(S.cpu.length>60)S.cpu.shift();
+  b.querySelector("#cp").textContent=c+"%";b.querySelector("#cb").style.width=c+"%";
+  const u=usedMB();b.querySelector("#mm").textContent=(u/1024).toFixed(1)+" / 16 GB";b.querySelector("#mb").style.width=u/TOTAL*100+"%";
+  x.clearRect(0,0,480,110);x.strokeStyle="#4aa3ff";x.lineWidth=2;x.beginPath();
+  S.cpu.forEach((v,i)=>{const px=i*8,py=108-v*1.05;i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();
+  b.querySelector("#pl").innerHTML=S.wins.map((o,i)=>`<div class="card" style="display:flex;justify-content:space-between;padding:6px 10px;margin:3px 0"><span>${APPS[o.k].i} ${o.name}</span><span>${o.mb} MB ${o===me?"":`<button class="b g" data-i="${i}" style="padding:2px 8px">End</button>`}</span></div>`).join("");
+  b.querySelectorAll("[data-i]").forEach(e=>e.onclick=()=>closeWin(S.wins[+e.dataset.i]));};
+ up();const iv=setInterval(up,700);return()=>clearInterval(iv);
+}
+
+// ---------- Calculator ----------
+function calcApp(b){
+ const keys="C ( ) /|7 8 9 *|4 5 6 -|1 2 3 +|0 . ⌫ =".split("|").join(" ").split(" ");
+ b.innerHTML='<div class="dsp">0</div><div class="ky"></div>';const d=b.firstChild,k=b.lastChild;let s="";
+ keys.forEach(c=>{const e=document.createElement("button");e.textContent=c;e.onclick=()=>{
+  if(c==="C")s="";else if(c==="⌫")s=s.slice(0,-1);
+  else if(c==="="){try{if(/^[\d+\-*/().\s]+$/.test(s))s=String(+(Function('"use strict";return('+s+')')()).toFixed(10));}catch(e){s="Error"}}
+  else s=(s==="Error"?"":s)+c;d.textContent=s||"0"};k.append(e)});
+}
+// ---------- audio ----------
+let AC,musOn=true,mt=null,mi=0;
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==="suspended")AC.resume();return AC}
+function beep(f,d,ty,v,w,sl){const a=ac();if(!a||!musOn)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+(w||0);o.type=ty;o.frequency.setValueAtTime(f,t);if(sl)o.frequency.exponentialRampToValueAtTime(sl,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d)}
+const SFX={click:()=>beep(700,.05,"square",.025),open:()=>{beep(440,.12,"sine",.07);beep(660,.15,"sine",.07,.08)},close:()=>beep(500,.12,"sine",.06,0,250),ok:()=>{beep(660,.1,"triangle",.08);beep(880,.15,"triangle",.08,.09)},bad:()=>beep(200,.25,"sawtooth",.05,0,120),unlock:()=>[523,659,784,1047].forEach((f,i)=>beep(f,.25,"sine",.08,i*.1))};
+const PEN=[261.6,293.7,329.6,392,440,523.3,587.3,659.3];
+function note(f,d,v){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime;o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.3);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d)}
+function musicStart(){if(!ac()||mt)return;mt=setInterval(()=>{if(!musOn)return;note(PEN[Math.random()*PEN.length|0],1.6,.03);if(mi++%4===0)note(PEN[[0,2,4,1][(mi>>2)%4]]/2,2.4,.045)},550)}
+$("#snd").onclick=()=>{musOn=!musOn;$("#snd").textContent=musOn?"🔊":"🔇";if(musOn){musicStart()}};
+document.addEventListener("click",e=>{const r=document.createElement("i");r.className="rip";r.style.left=e.clientX+"px";r.style.top=e.clientY+"px";document.body.append(r);setTimeout(()=>r.remove(),600);if(e.target.closest("button,.ic,.tk,.chip,#st,#menu div"))SFX.click()});
+
+// ---------- animations ----------
+function bubbles(el,cls,n){for(let i=0;i<n;i++){const s=document.createElement("i"),z=20+Math.random()*60;s.className=cls;s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;animation-duration:${8+Math.random()*12}s;animation-delay:${-Math.random()*15}s`;el.append(s)}}
+bubbles($("#lock"),"bub",14);bubbles($("#desk"),"orb",10);
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.append(t);setTimeout(()=>t.remove(),3200)}
+function welcome(){setTimeout(()=>toast("👋 Welcome back, miotarch!"),500)}
+
+// ---------- file system ----------
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let FS=null;try{FS=JSON.parse(localStorage.getItem("miotos_fs"))}catch(e){}
+if(!FS||typeof FS!=="object")FS={Documents:{"Welcome.txt":"Welcome to miotOS!\n\nWrite notes in Notepad, then Save them here."},Desktop:{},Downloads:{}};
+const fsCb=[];
+function saveFS(){try{localStorage.setItem("miotos_fs",JSON.stringify(FS))}catch(e){}fsCb.forEach(f=>f())}
+const cleanName=n=>{n=String(n).replace(/[\\/:*?"<>|]/g,"").trim()||"Untitled.txt";return/\.[^.]+$/.test(n)?n:n+".txt"};
+
+function noteApp(b,me,arg){
+ let cur=arg?{f:arg.folder,n:arg.name}:null,pend=null;
+ b.innerHTML=`<div style="display:flex;flex-direction:column;height:100%;position:relative"><div style="display:flex;gap:6px;padding:8px;background:#26272a;flex-wrap:wrap;align-items:center"><select class="f" id="fo"></select><input class="f" id="fn" style="flex:1;min-width:110px" placeholder="File name"><button class="b" id="sv">💾 Save</button><button class="b g" id="op">📂 Open</button><button class="b g" id="cx">✂ Cut</button><button class="b g" id="cc">⧉ Copy</button><button class="b g" id="cv">📋 Paste</button></div><textarea id="ta" style="flex:1;height:auto;min-height:0" placeholder="Type here…"></textarea><div id="ms" style="padding:5px 10px;font-size:12px;background:#26272a;min-height:26px"></div><div id="pk" style="display:none;position:absolute;inset:0;background:#1b1c1ef2;overflow:auto;padding:12px;z-index:3"></div></div>`;
+ const q=s=>b.querySelector(s),fo=q("#fo"),fn=q("#fn"),ta=q("#ta"),ms=q("#ms");
+ const title=()=>{me.w.querySelector(".tb span").textContent="📝 "+(cur?cur.n:"Untitled")+" — Notepad"};
+ const fill=()=>{fo.innerHTML=Object.keys(FS).map(k=>`<option ${(cur?cur.f===k:k==="Documents")?"selected":""}>${esc(k)}</option>`).join("")};
+ fill();fn.value=cur?cur.n:"Untitled.txt";ta.value=cur&&FS[cur.f]&&FS[cur.f][cur.n]!=null?FS[cur.f][cur.n]:"";title();
+ fn.addEventListener("input",()=>{pend=null});
+ const save=()=>{const f=fo.value,n=cleanName(fn.value);fn.value=n;const key=f+"/"+n;
+  const exists=FS[f]&&FS[f][n]!=null&&!(cur&&cur.f===f&&cur.n===n);
+  if(exists&&pend!==key){pend=key;ms.innerHTML='<b style="color:#ffb347">⚠ “'+esc(n)+'” already exists in '+esc(f)+'. Press Save again to overwrite, or change the name.</b>';SFX.bad();return}
+  pend=null;FS[f]=FS[f]||{};FS[f][n]=ta.value;cur={f,n};title();ms.textContent="✅ Saved to "+f+" / "+n+" at "+new Date().toLocaleTimeString();SFX.ok();toast("💾 Saved "+n);saveFS()};
+ q("#sv").onclick=save;
+ q("#cx").onclick=()=>{ta.focus();document.execCommand("cut")};
+ q("#cc").onclick=()=>{ta.focus();document.execCommand("copy")};
+ q("#cv").onclick=()=>{ta.focus();try{navigator.clipboard.readText().then(x=>{ta.setRangeText(x,ta.selectionStart,ta.selectionEnd,"end")}).catch(()=>toast("Button paste is blocked here — press Ctrl+V"))}catch(x){toast("Press Ctrl+V to paste")}};
+ ta.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();save()}});
+ q("#op").onclick=()=>{const pk=q("#pk");pk.style.display="block";
+  pk.innerHTML="<h3>Open a file</h3>"+Object.keys(FS).map(f=>'<div style="margin:8px 0;color:#9cf">📁 '+esc(f)+"</div>"+(Object.keys(FS[f]).map(n=>`<div class="fi" data-f="${esc(f)}" data-n="${esc(n)}" style="cursor:pointer">📄 ${esc(n)}</div>`).join("")||'<div style="font-size:12px;color:#888">(empty)</div>')).join("")+'<button class="b g" id="cl">Cancel</button>';
+  pk.querySelector("#cl").onclick=()=>{pk.style.display="none"};
+  pk.querySelectorAll(".fi").forEach(e=>{e.onclick=()=>{cur={f:e.dataset.f,n:e.dataset.n};fill();fn.value=cur.n;ta.value=FS[cur.f][cur.n];title();pk.style.display="none";ms.textContent="Opened "+cur.f+" / "+cur.n}})};
+}
+
+// ---------- icon dragging ----------
+function iconPos(){try{return JSON.parse(localStorage.getItem("miotos_icons"))||{}}catch(e){return{}}}
+function makeDrag(d,k){
+ const sp=iconPos()[k];if(sp){d.style.left=sp[0]+"px";d.style.top=sp[1]+"px"}
+ d.style.touchAction="none";
+ d.addEventListener("pointerdown",e=>{if(e.button)return;const sx=e.clientX,sy=e.clientY,ox=d.offsetLeft,oy=d.offsetTop;let mv=false;
+  try{d.setPointerCapture(e.pointerId)}catch(x){}
+  const desk=$("#desk");
+  const move=m=>{const dx=m.clientX-sx,dy=m.clientY-sy;if(!mv&&Math.hypot(dx,dy)<6)return;
+   if(!mv){mv=true;d.style.animation="none";d.style.zIndex=3;d.style.opacity=.85;d.style.transform="scale(1.1)"}
+   d.style.left=Math.max(0,Math.min(desk.clientWidth-78,ox+dx))+"px";d.style.top=Math.max(0,Math.min(desk.clientHeight-84,oy+dy))+"px"};
+  const up=()=>{d.removeEventListener("pointermove",move);d.removeEventListener("pointerup",up);d.removeEventListener("pointercancel",up);
+   d.style.opacity="";d.style.transform="";d.style.zIndex="";
+   if(mv){const cols=Math.max(1,Math.floor((desk.clientWidth-14)/90)),rows=Math.max(1,Math.floor((desk.clientHeight-14)/92));
+    const taken=new Set([...desk.querySelectorAll(".ic")].filter(x=>x!==d).map(x=>Math.round((x.offsetLeft-14)/90)+","+Math.round((x.offsetTop-14)/92)));
+    let best=null,bd=1e9;const cx=(d.offsetLeft-14)/90,cy=(d.offsetTop-14)/92;
+    for(let c=0;c<cols;c++)for(let r=0;r<rows;r++){if(taken.has(c+","+r))continue;const dd=(c-cx)**2+(r-cy)**2;if(dd<bd){bd=dd;best=[c,r]}}
+    if(best){d.style.transition="left .18s,top .18s";d.style.left=(14+best[0]*90)+"px";d.style.top=(14+best[1]*92)+"px";setTimeout(()=>{d.style.transition=""},220);
+     const p=iconPos();p[k]=[14+best[0]*90,14+best[1]*92];try{localStorage.setItem("miotos_icons",JSON.stringify(p))}catch(x){}}
+    SFX.click()}
+   else if(e.pointerType==="touch")openApp(k)};
+  d.addEventListener("pointermove",move);d.addEventListener("pointerup",up);d.addEventListener("pointercancel",up)});
+}
+
+// ---------- My Files (with cut / copy / paste) ----------
+let CLIP=null;
+function filesApp(b){
+ let fo=null,rn=null,msg="";
+ const render=()=>{
+  if(fo&&!FS[fo])fo=null;
+  const pst=CLIP?`<button class="b" data-a="pst">📋 Paste “${esc(CLIP.n)}”</button>`:"";
+  let h='<div class="pad"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px">'+(fo?'<button class="b g" data-a="up">← Back</button>':"")+'<b style="flex:1">💻 This PC'+(fo?" › "+esc(fo):"")+"</b>"+(fo?pst+'<button class="b" data-a="new">＋ New file</button><button class="b g" data-a="pt">📥 Paste text as file</button>':'<input class="f" id="nf" placeholder="New folder name" style="width:150px"><button class="b" data-a="mk">＋ Folder</button>')+"</div>";
+  if(!fo)h+=Object.keys(FS).map(k=>{const c=Object.keys(FS[k]).length;return`<div class="fi" data-a="in" data-f="${esc(k)}" style="cursor:pointer"><span style="font-size:26px">📁</span><b style="flex:1">${esc(k)}</b><span style="font-size:12px;color:#aaa">${c} file(s)</span>${CLIP?`<button class="b" data-a="pst" data-f="${esc(k)}">📋 Paste here</button>`:""}${c?"":`<button class="b g" data-a="rf" data-f="${esc(k)}">🗑</button>`}</div>`}).join("");
+  else h+=Object.keys(FS[fo]).map(n=>rn===n?`<div class="fi"><span>📄</span><input class="f" id="rv" value="${esc(n)}" style="flex:1"><button class="b" data-a="rok" data-n="${esc(n)}">OK</button><button class="b g" data-a="rno">✕</button></div>`:`<div class="fi" style="flex-wrap:wrap"><span style="font-size:22px">📄</span><b style="flex:1;min-width:90px;overflow:hidden;text-overflow:ellipsis">${esc(n)}</b><span style="font-size:12px;color:#aaa">${FS[fo][n].length} chars</span><button class="b" data-a="op" data-n="${esc(n)}">Open</button><button class="b g" data-a="cp" data-n="${esc(n)}">⧉ Copy</button><button class="b g" data-a="ct" data-n="${esc(n)}">✂ Cut</button><button class="b g" data-a="rn" data-n="${esc(n)}">Rename</button><button class="b g" data-a="del" data-n="${esc(n)}">🗑</button></div>`).join("")||'<div class="card">This folder is empty. Save a file from Notepad, paste one here, or press “New file”.</div>';
+  b.innerHTML=h+(msg?`<div style="font-size:12px;color:#ffb347">${msg}</div>`:"")+"</div>";
+  const r=b.querySelector("#rv");if(r){r.focus();r.select()}};
+ b.onclick=e=>{const t=e.target.closest("[data-a]");if(!t)return;const a=t.dataset.a,n=t.dataset.n;msg="";
+  if(a==="in")fo=t.dataset.f;
+  else if(a==="up")fo=null;
+  else if(a==="mk"){const v=b.querySelector("#nf").value.replace(/[\\/]/g,"").trim();if(!v)msg="Type a folder name.";else if(FS[v])msg="That folder already exists.";else{FS[v]={};SFX.ok();saveFS();return}}
+  else if(a==="rf"){delete FS[t.dataset.f];saveFS();return}
+  else if(a==="op"){openApp("note",{folder:fo,name:n});return}
+  else if(a==="new"){let i=1,nm="New file.txt";while(FS[fo][nm]!=null)nm="New file ("+(++i)+").txt";FS[fo][nm]="";rn=nm;SFX.ok();saveFS();return}
+  else if(a==="cp"||a==="ct"){CLIP={m:a==="ct"?"cut":"copy",f:fo,n};try{navigator.clipboard.writeText(FS[fo][n]).catch(()=>{})}catch(x){}msg=(a==="ct"?"✂ Cut “":"⧉ Copied “")+esc(n)+"”. Open a folder and press Paste.";SFX.click()}
+  else if(a==="pst"){const tf=t.dataset.f||fo;
+   if(!CLIP||!FS[CLIP.f]||FS[CLIP.f][CLIP.n]==null){msg="Nothing to paste.";CLIP=null}
+   else if(CLIP.m==="cut"&&CLIP.f===tf){msg="That file is already in this folder.";CLIP=null}
+   else{let nm=CLIP.n;if(FS[tf][nm]!=null){const ext=(nm.match(/\.[^.]+$/)||[""])[0],base=nm.slice(0,nm.length-ext.length);let i=1;do{nm=base+" - Copy"+(i>1?" ("+i+")":"")+ext;i++}while(FS[tf][nm]!=null)}
+    FS[tf][nm]=FS[CLIP.f][CLIP.n];if(CLIP.m==="cut"){delete FS[CLIP.f][CLIP.n];CLIP=null}SFX.ok();saveFS();return}}
+  else if(a==="pt"){try{navigator.clipboard.readText().then(x=>{let nm="Pasted text.txt",i=1;while(FS[fo][nm]!=null)nm="Pasted text ("+(++i)+").txt";FS[fo][nm]=x;SFX.ok();saveFS()}).catch(()=>{msg="Your browser blocked clipboard access. Paste with Ctrl+V inside Notepad instead.";render()})}catch(x){msg="Clipboard isn’t available here. Paste with Ctrl+V inside Notepad instead."}return}
+  else if(a==="rn")rn=n;
+  else if(a==="rno")rn=null;
+  else if(a==="rok"){const v=cleanName(b.querySelector("#rv").value);if(v!==n&&FS[fo][v]!=null)msg="A file with that name already exists.";else{if(v!==n){FS[fo][v]=FS[fo][n];delete FS[fo][n]}rn=null;SFX.ok();saveFS();return}}
+  else if(a==="del"){delete FS[fo][n];SFX.close();saveFS();return}
+  render()};
+ fsCb.push(render);render();return()=>{fsCb.splice(fsCb.indexOf(render),1)};
+}
+
+// ---------- Internet search ----------
+async function getSample(){try{return window.claude&&window.claude.use?await window.claude.use("sample"):null}catch(e){return null}}
+function netApp(b){
+ b.innerHTML='<div class="pad"><div style="display:flex;gap:6px"><input class="f" id="q" style="flex:1" placeholder="Search anything — people, science, history, countries…"><button class="b" id="sg">🔎 Search</button></div><div id="sug" style="margin:8px 0"></div><div id="rs"></div></div>';
+ const q=b.querySelector("#q"),rs=b.querySelector("#rs"),sug=b.querySelector("#sug");let ctl=null;
+ ["Japan","Who invented the telephone?","How do volcanoes form?","Capital of Brazil","Explain black holes","Iceland"].forEach(s=>{const c=document.createElement("span");c.className="chip";c.textContent=s;c.onclick=()=>{q.value=s;run()};sug.append(c)});
+ const card=c=>`<div class="card"><b style="font-size:16px">${c[0]}</b> <span class="chip">${c[1]}</span><br>🏛 Capital: ${c[2]} · 👥 ${c[3]}<br>🗣 ${c[4]}<br>💡 ${c[5]}<br>🕒 Local time: <b>${new Date().toLocaleTimeString([],{timeZone:c[6]})}</b></div>`;
+ const run=async()=>{
+  const t=q.value.trim().slice(0,300);if(!t)return;const tl=t.toLowerCase();
+  const m=C.filter(c=>c.slice(0,5).join(" ").toLowerCase().includes(tl)||tl.includes(c[0].toLowerCase())).slice(0,3);
+  rs.innerHTML=m.map(card).join("")+'<div class="card"><b>🔎 Search answer</b><div id="at" style="margin-top:6px;white-space:pre-wrap">Searching…</div><div style="font-size:11px;color:#999;margin-top:8px">Answers come from Claude’s built-in knowledge, not live web pages, so very recent news may be missing.</div></div>';
+  const at=rs.querySelector("#at"),sm=await getSample();
+  if(!sm){at.textContent="Full search needs this page opened on claude.ai. Showing built-in country results only.";return}
+  if(ctl)ctl.abort();ctl=new AbortController();
+  try{const r=await sm("You are the search engine inside miotOS, a browser-based computer simulator. Answer the search query below with a clear, factual, well-organised answer in plain text (no markdown symbols), at most 150 words. If it is about very recent events you cannot know, say so briefly.\n\nSearch query: "+t,{onText:x=>{at.textContent=x.text},signal:ctl.signal,cache:false});at.textContent=r.text}
+  catch(e){if(e&&e.name==="AbortError")return;at.textContent=e&&e.code==="not_granted"?"You declined the search permission, so only built-in results are shown.":"Couldn’t reach the search service right now. Please try again."}
+ };
+ b.querySelector("#sg").onclick=run;q.addEventListener("keydown",e=>{if(e.key==="Enter")run()});
+}
+
+// ---------- Limeleaf AI ----------
+function leafApp(b){
+ b.innerHTML=`<div style="display:flex;flex-direction:column;height:100%;background:linear-gradient(160deg,#10261a,#17331f)"><div style="padding:10px 14px;background:#1c4a2a;display:flex;align-items:center;gap:8px"><span style="font-size:26px;animation:bob 2s infinite">🍃</span><b>Limeleaf</b><span style="font-size:12px;opacity:.7">your little AI helper</span></div><div id="ms" style="flex:1;overflow:auto;padding:12px"></div><div style="display:flex;gap:6px;padding:8px;background:#14301f"><input class="f" id="in" style="flex:1;min-width:0" placeholder="Ask anything, or say “open notepad”…"><button class="b" id="sd" style="background:#2e9e55">Send</button></div></div>`;
+ const ms=b.querySelector("#ms"),inp=b.querySelector("#in");let hist=[];
+ const add=(who,t)=>{const d=document.createElement("div");d.style.cssText="max-width:84%;margin:6px 0;padding:8px 12px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;animation:mi .25s both;"+(who==="u"?"margin-left:auto;background:#2e9e55":"background:#26402f");d.textContent=t;ms.append(d);ms.scrollTop=ms.scrollHeight;return d};
+ add("a","Hi miotarch! 🍃 I’m Limeleaf. Ask me anything, do quick maths, or tell me to open an app.");
+ const J=["Why do programmers prefer dark mode? Because light attracts bugs.","I would tell you a UDP joke, but you might not get it.","There are 10 kinds of people: those who understand binary and those who don’t."];
+ const local=t=>{const s=t.toLowerCase().trim().replace(/[.!?]+$/,"");
+  const m=s.match(/^(?:please )?(?:open|launch|start)\s+(.+)$/);
+  if(m){const N={notepad:"note",files:"files","my files":"files",calculator:"calc",internet:"net",search:"net","task manager":"tm",clock:"clock","world clock":"clock",limeleaf:"leaf"},k=N[m[1].trim()];if(k){openApp(k);return"Opening "+APPS[k].n+" ✨"}return"I can open: Notepad, My Files, Calculator, Internet, Task Manager and World Clock."}
+  if(/^(hi|hello|hey)\b/.test(s)&&s.length<20)return"Hello! How can I help you today?";
+  if(/\btime\b/.test(s)&&s.length<28)return"It’s "+new Date().toLocaleTimeString()+".";
+  if(/\b(date|day)\b/.test(s)&&s.length<28)return"Today is "+new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"})+".";
+  if(/joke/.test(s)&&s.length<30)return J[Math.random()*J.length|0];
+  const mm=s.replace(/^(what is|what’s|what's|calculate|calc)\s*/,"").replace(/[=]/g,"").replace(/\bx\b/g,"*").trim();
+  if(/^[\d+\-*/().\s]+$/.test(mm)&&/\d\s*[+\-*/]\s*\d/.test(mm)){try{return mm+" = "+(+Function('"use strict";return('+mm+')')().toFixed(8))}catch(x){}}
+  return null};
+ const send=async()=>{const t=inp.value.trim().slice(0,600);if(!t)return;inp.value="";add("u",t);SFX.click();
+  const l=local(t);if(l){add("a",l);return}
+  const d=add("a","."),iv=setInterval(()=>{d.textContent=".".repeat(Date.now()/300%3+1|0)},300);
+  const sm=await getSample();
+  if(!sm){clearInterval(iv);d.textContent="Offline I can only open apps, tell the time or date, and do maths. Open this page on claude.ai to chat with me properly.";return}
+  hist.push({role:"user",content:t});hist=hist.slice(-10);while(hist.length&&hist[0].role!=="user")hist.shift();
+  const msgs=hist.map(x=>({...x}));msgs[0].content="You are Limeleaf, a friendly, concise assistant living inside miotOS, a browser-based computer simulator. Keep replies under 120 words, plain text, no markdown.\n\n"+msgs[0].content;
+  try{const r=await sm(msgs,{onText:x=>{clearInterval(iv);d.textContent=x.text;ms.scrollTop=ms.scrollHeight},cache:false});clearInterval(iv);d.textContent=r.text;hist.push({role:"assistant",content:r.text});ms.scrollTop=ms.scrollHeight}
+  catch(e){clearInterval(iv);hist.pop();d.textContent=e&&e.code==="not_granted"?"You declined permission, so I can only do basic offline things.":"Hmm, I couldn’t reach my brain right now. Try again in a moment."}};
+ b.querySelector("#sd").onclick=send;inp.addEventListener("keydown",e=>{if(e.key==="Enter")send()});
+}
+</script></body></html>
